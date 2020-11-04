@@ -1,0 +1,269 @@
+﻿@charset "UTF-8";
+
+/* Normalize */
+/*
+           * 1. 기본 글꼴을 sans-serif로 설정.
+           * 2. iOS와 IE에서 기기 회전시에 사용자가 확대하지 않아도 글씨 크기가 재조정되는 것을 예방.
+        */
+html {
+    /*font-family: sans-serif;*/
+    /* 1 */
+    -ms-text-size-adjust: 100%;
+    /* 2 */
+    -webkit-text-size-adjust: 100%;
+    /* 2 */
+}
+
+/* * 기본 패딩, 마진값을 제거. */
+body {
+    margin: 0;
+}
+
+html,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+form,
+fieldset,
+img,
+ul,
+p,
+dl,
+ol,
+dd,
+dt {
+    margin: 0;
+    padding: 0;
+    border: 0
+}
+
+li {
+    list-style-type: none;
+}
+
+/* * IE10에서 활성화(active)된 링크의 회색 배경을 제거. */
+a {
+    background-color: transparent;
+}
+
+/* * 모바일웹, 아이폰 터치 시 발생하는 탭 하이라이트 제거 */
+a,
+.linked {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+a:link,
+a:visited {
+    text-decoration: none;
+    color: #333;
+}
+
+/*
+            * IE8/9에서 정의되지 않은 HTML5 요소를 'block'으로 지정.
+            * IE10/11, Firefox에서 정의되지 않은 `detail` 혹은 `summary` 를 `block`으로 지정.
+            * IE11에서 정의되지 않은 `main`을 `block`으로 지정
+        */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+    display: block;
+}
+
+/*
+            * 1. IE8/9에서 `inline-block`으로 정의되지 않은 것을 올바르게 지정.
+            * 2. Chrome, Firefox, Opera에서 `progress`의 세로 정렬을 표준화.
+        */
+audio,
+canvas,
+progress,
+video {
+    display: inline-block;
+    /* 1 */
+    vertical-align: baseline;
+    /* 2 */
+}
+
+/* * IE 8/9/10에서 `a` 요소안에 이미지가 위치할 경우 생기는 테두리 제거. */
+img {
+    border: 0;
+}
+
+/*
+           * 알려진 한계: 기본적으로 OS X의 Chrome과 Safari는 `border` 속성을 지정하지 않는 한 `select` 요소의 스타일링에 매우 제한적이다.
+           * 1. color 속성이 상속되지 않는 것을 수정.
+           * 알려진 문제: disabled 된 요소의 color 속성에도 영향을 미친다.
+           * 2. font 속성이 상속되지 않는 것을 수정.
+           * 3. Firefox 4+, Safari, Chrome에서 마진이 서로 다른 것을 해결.
+           * 4. textarea 테두리 제거
+        */
+button,
+input,
+optgroup,
+select,
+textarea {
+    color: inherit;
+    /* 1 */
+    font: inherit;
+    /* 2 */
+    margin: 0;
+    /* 3 */
+    border: 0;
+    /* 4 */
+}
+
+
+/* * 기본적으로 설정된 모양 제거 */
+textarea,
+input[type="text"],
+input[type="number"],
+input[type="button"],
+input[type="submit"] {
+    -webkit-appearance: none;
+}
+
+/* *input에 focus 됐을 때 파란 테두리 제거*/
+input:focus {
+    outline: none;
+}
+
+/* *input 태그에 보여지게 될 x 버튼을 제거*/
+input[type=text]::-ms-clear {
+    display: none;
+}
+
+/* * IE 8/9/10/11에서 `overflow` 속성값이 `hidden`으로 설정되어 있는 것을 수정 */
+button {
+    overflow: visible;
+}
+
+/*
+            * `button`과 `select` 요소에 `text-transform` 상속이 일치하지 않는 것을 해결
+            * 모든 다른 폼 컨트롤 요소는 `text-transform` 값을 상속하지 않는다.
+            * IE 8/9/10/11, Firefox, Opera에서 `button` 요소의 스타일 상속 수정.
+            * Firefox에서 `select` 요소의 스타일 상속 수정.
+        */
+button,
+select {
+    text-transform: none;
+}
+
+/*
+            * 2. iOS에서 클릭가능한 `input` 유형에 스타일링을 할 수 없는 것을 수정.
+            * 3. `input` 요소와 다른 요소들의 image-type의 커서 모양을 일치시켜 가용성을 향상.
+            * `input` and others.
+        */
+button,
+html input[type="button"],
+/* 1 */
+input[type="reset"],
+input[type="submit"] {
+    -webkit-appearance: button;
+    /* 2 */
+    cursor: pointer;
+    /* 3 */
+}
+
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+.btn_img,
+.btn_close {
+    cursor: pointer;
+}
+
+/* * disabled된 요소의 기본 커서를 재설정 */
+
+button[disabled],
+html input[disabled] {
+    cursor: default;
+}
+
+/*
+            * 이러한 요소의 스타일을 설정하려고하지 않는 것이 좋다.
+            * Firefox에서 아래의 요소에서 box-sizing, padding, width가 구현안된다고 생각하는 것이 좋음
+            * 1. IE 8/9/10에서 box sizing 속성값을 `content-box`에서 `border-box`로 변경
+            * 2. IE 8/9/10에서 영역을 벗어나지 않도록 `padding`을 제거
+        */
+input[type="checkbox"],
+input[type="radio"] {
+    box-sizing: border-box;
+    /* 1 */
+    padding: 0;
+    /* 2 */
+    vertical-align: middle;
+}
+
+/* * iOS에서 input 입력창에 border-radius가 자동으로 들어가있는것을 제거. */
+input[type="text"],
+input[type="password"] {
+    border-radius: 0;
+    border: none;
+}
+
+/* * Firefox 4+, Safari, Chrome에서 `bolder`로 설정되어 있는 것을 `bold`로 수정. */
+b,
+strong {
+    font-weight: 600;
+}
+
+/* * address의 기본 기울기를 없앰.*/
+address {
+    font-style: normal;
+}
+
+/* * Firefox 4+, Safari, Chrome에서 `section`과 `article` 내부의 `h1` 요소의 글꼴 크기와 마진값이 서로 다른 것을 통일시킴. */
+h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+}
+
+/* * IR(Image Repalcement)*/
+.blind {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    font-size: 1px;
+    line-height: 0;
+    overflow: hidden;
+}
+
+/* * i를 icon을 담는 의미로 사용한다.*/
+i {
+    display: inline-block;
+    font-style: normal;
+}
+
+/* * 스크린리더기를 위해 사용한다.*/
+em {
+    font-style: normal;
+}
+
+/* * 읽기만 해야 하는 곳에선 아무 효과 없다는 표시*/
+input[readonly],
+textarea[readonly] {
+    cursor: default;
+    outline: 0;
+}
+
+canvas {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+/* //Normalize*/

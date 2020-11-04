@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>eth</title>
+  <link href="/normalize.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    window.addEventListener("load", function () {
+      // var socket = io.connect(url, {transports:['websocket']})
+    });
+    //socket.io 서버에 접속한다.
+    var socket = io();
+
+    function selectElem(el) {
+      var CoinTokenAddress = '_TOKEN_ADDRESS_VALUE_'
+      if (el.classList.contains("select_open")) {
+        el.classList.remove("select_open");
+      } else {
+        el.classList.add("select_open");
+        for (i = 0; i < el.querySelectorAll(".link_select").length; i++) {
+          el.querySelectorAll(".link_select")[i].addEventListener(
+            "click",
+            function () {
+              switch (String(this.innerHTML)) {
+                case "Coin":
+                  document.getElementById("txtTokenAddress").value = CoinTokenAddress;
+                  socket.emit("getTokenAddress", CoinTokenAddress, document
+                    .getElementById("txtWalletAddress").value);
+                  break;
+                default:
+                  document.getElementById("txtTokenAddress").value = "";
+                  break;
+              }
+            }
+          );
+        }
+      }
+    }
+
+    function getBalance(el, e) {
+      if (el.value.length == 42 && el.value.substring(0, 2) == "0x") {
+        //서버로 자신의 정보를 넘긴다.
+        socket.emit("getAddress", el.value);
+        e.preventDefault();
+        document.getElementById("txtWalletAddress").classList.remove("error");
+      } else {
+        document.getElementById("txtETHBalance").innerHTML = 0;
+        document
+          .getElementById("txtWalletAddress")
+          .parentElement.classList.add("error");
+        document.getElementById(
+            "txtWalletAddress"
+          ).parentElement.nextElementSibling.innerHTML =
+          "주소를 올바르게 입력해주세요";
+      }
+    }
+
+    function getTokenBalance(el, e) {
+      if (el.value.length == 42 && el.value.substring(0, 2) == "0x") {
+        console.log("토큰실행");
+        //send message 이벤트 발생 서버로 매개변수 넘기기
+        socket.emit("getTokenAddress", el.value, document.getElementById("txtWalletAddress").value);
+        e.preventDefault();
+        document.getElementById("txtTokenAddress").classList.remove("error");
+      } else {
+        document.getElementById("txtTokenBalance").innerHTML = 0;
+        document
+          .getElementById("txtTokenAddress")
+          .parentElement.classList.add("error");
+        document.getElementById(
+            "txtTokenAddress"
+          ).parentElement.nextElementSibling.innerHTML =
+          "주소를 올바르게 입력해주세요";
+      }
+    }
+
+    function sendTransaction() {
+      var WalletAddress = document.getElementById("txtWalletAddress")
+      var ToAddress = document.getElementById("txtToAddress")
+      var TokenAddress =
+        document
+        .getElementById("txtTokenAddress")
+      var ToCoin = document.getElementById("txtToCoin")
+      var Password = document.getElementById("txtPassword")
+
+
+      if (WalletAddress.value.trim() == "") {
+        alert("보내는 지갑주소를 입력하세요.");
+        return;
+      }
+      if (ToAddress.value.trim() == "") {
+        alert("받는 지갑주소를 입력하세요.");
+        return;
+      }
+      if (ToCoin.value.trim() == "") {
+        alert("보내는 코인의 양을 입력하세요.");
+        return;
+      }
+      if (Password.value.trim() == "") {
+        alert("보내는 지갑의 비밀번호를 입력하세요.");
+        return;
+      }
+
+      socket.emit("send transaction", WalletAddress.value, ToAddress.value,
+        ToCoin.value, Password.value, TokenAddress.value)
+
+    }
+
+    function newAccount() {
+      socket.emit("new account")
+    }
+
+    function getTransaction() {
+      var txtHash = document.getElementById("txtHash")
+
+      if (txtHash.value.trim() == "") {
+        alert("검색할 해쉬값을 입력해주세요");
+        return;
+      }
+
+      socket.emit("get transaction data", txtHash.value)
+
+    }
+    //hexa to utf8
+    //
+    function hex2a(hex) {
+      r = decodeURIComponent(hex.replace(/\s+/g, '').replace(/[0-9a-f]{2}/g, '%$&'));
+      return r;
+    }
+
+    //서버로부터 메시지가 수신되면
+    socket.on("got transaction", function (msg) {
+      console.log(msg);
+
+      value = msg.input.split('0x')[1]
+      result = hex2a(value)
+
+      console.log(result)
+
+      var node = document.createElement('div')
+      var textNode = document.createTextNode(result);
+      node.classList.add('pop')
+
+      node.appendChild(textNode);
+      document.body.appendChild(node);
+    });
+
+    socket.on("invalid address", function (e) {
+      console.log("Invalid Address");
+      document.getElementById("txtETHBalance").innerHTML = 0;
+      document.getElementById("txtTokenBalance").innerHTML = 0;
+    });
+
+    socket.on("getBalance", function (msg) {
+      console.log(msg);
+      document.getElementById("txtETHBalance").innerHTML = Number(
+        msg
+      ).toLocaleString("en");
+      document
+        .getElementById("txtWalletAddress")
+        .parentElement.classList.remove("error");
+      document.getElementById(
+        "txtWalletAddress"
+      ).parentElement.nextElementSibling.innerHTML = "";
+    });
+
+    socket.on("getTokenBalance", function (values) {
+      var tokenBalance = Number(values[0])
+      var tokenSymbol = values[1]
+      var tokenName = values[2]
+      var decimals = Number(values[3])
+      var adjustedBalance = tokenBalance / Math.pow(10, decimals)
+      console.log(tokenBalance[0]);
+
+      document.getElementById("txtTokenBalance").innerHTML =
+        adjustedBalance.toFixed(decimals) + tokenSymbol;
+      document
+        .getElementById("txtTokenAddress")
+        .parentElement.classList.remove("error");
+      document.getElementById(
+        "txtTokenAddress"
+      ).parentElement.nextElementSibling.innerHTML = "";
+    });
+  </script>
+
+  <section class="wrap">
+    <div class="form">
+      <h2>입력 폼</h2>
+
+      <div class="form_row">
+        <div class="nav_group">
+          <span class="nav_item" onclick="newAccount();">계정 생성</span>
+        </div>
+      </div>
+
+      <div class="form_row">
+        <label>해쉬값 검색</label>
+        <span class="ps_box">
+          <input id="txtHash" type="text" value="" placeholder="검색할 해쉬값을 입력하세요" />
+          <span class="btn" onclick="getTransaction(this);">검색</span>
+        </span>
+        <span class="error_box"></span>
+      </div>
+    </div>
+
+    <div class="form_row">
+      <label>지갑 주소</label>
+      <span class="ps_box">
+        <input id="txtWalletAddress" type="text" value="" placeholder="지갑주소를 입력해주세요" maxlength="42"
+          onkeyup="getBalance(this, event)" />
+      </span>
+      <span class="error_box"></span>
+    </div>
+
+    <div class="form_row">
+      <label>토큰 주소</label>
+      <span class="ps_box">
+        <input id="txtTokenAddress" type="text" value="" placeholder="토큰주소를 입력해주세요(직접입력)" maxlength="42"
+          onkeyup="getTokenBalance(this, event)" />
+      </span>
+      <span class="error_box"></span>
+
+      <div class="item_select" onclick="selectElem(this);">
+        <!-- 선택시 select_open 클래스 추가 -->
+        <a href="#none" class="link_selected">
+          토큰주소 선택
+          <span class="ico_account ico_arr">선택</span>
+        </a>
+        <!-- 선택된 내용이 입력됩니다 -->
+        <ul class="list_select">
+          <li>
+            <a href="#" class="link_select">NFRD</a>
+            <a href="#" class="link_select">7six9 Coin</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="form_row">
+      <label>보낼 주소</label>
+      <span class="ps_box">
+        <input id="txtToAddress" type="text" value="" placeholder="받을 분의 지갑주소를 입력해주세요" maxlength="42"
+          onkeyup="validation(this, event)" />
+      </span>
+      <span class="error_box"></span>
+    </div>
+
+    <div class="form_row">
+      <label>보낼 코인액수</label>
+      <span class="ps_box">
+        <input id="txtToCoin" type="tel" value="" placeholder="코인액수를 입력해주세요" />
+      </span>
+      <span class="error_box"></span>
+    </div>
+
+    <div class="form_row">
+      <label>암호</label>
+      <span class="ps_box">
+        <input id="txtPassword" type="password" value="" placeholder="보내시는 분의 암호를 입력해주세요" maxlength="42"
+          onkeyup="validation(this, event)" />
+        <span class="btn" onclick="sendTransaction(this);">보내기</span>
+      </span>
+      <span class="error_box"></span>
+    </div>
+    </div>
+  </section>
+
+  <section class="sticky_wrap">
+    <div class="sticky">
+      <div class="sticky_row">
+        잔액
+        <div class="sticky_value" id="txtETHBalance">0</div>
+      </div>
+      <div class="sticky_row">
+        토큰잔액
+        <div class="sticky_value" id="txtTokenBalance">0</div>
+      </div>
+    </div>
+  </section>
+
+
+  <style>
+    body {
+      background: #f7f7f7;
+      font-family: "Noto Sans KR", sans-serif;
+      font-weight: 400;
+      color: #333;
+      font-size: 18px;
+    }
+
+    .wrap {
+      background: #fff;
+      max-width: 1024px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .wrap>div {
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h2 {
+      padding-top: 20px;
+      padding-bottom: 30px;
+    }
+
+    input {
+      flex: 1 1 auto;
+    }
+
+    .btn {
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      color: grey;
+    }
+
+    .nav_group {
+      display: flex;
+    }
+
+    .nav_item {
+      display: block;
+      cursor: pointer;
+      padding: 0.5em 1em;
+      border-radius: 3px;
+      background: #1f1f1f;
+      color: #f7f7f7;
+      margin-right: 10px;
+    }
+
+    .form_row {
+      margin-bottom: 30px;
+    }
+
+    .ps_box {
+      display: flex;
+      border: 1px solid #eee;
+      padding: 0.4em;
+    }
+
+    .error_box {
+      font-size: 0.8em;
+      color: red;
+    }
+
+    .error {
+      border: 1px solid red;
+    }
+
+    .correct {
+      border: 1px solid greenyellow;
+    }
+
+    .item_select {
+      position: relative;
+    }
+
+    .item_select .link_selected {
+      display: block;
+      height: 48px;
+      line-height: 47px;
+    }
+
+    .item_select .list_select {
+      min-width: 90px;
+      width: 100%;
+      overflow-y: auto;
+      display: none;
+      position: absolute;
+      top: 40px;
+      z-index: 10;
+      max-height: 160px;
+      border: 1px solid #eee;
+      border-radius: 2px;
+      font-size: 13px;
+      background-color: #fff;
+      -webkit-box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .ico_account {
+      overflow: hidden;
+      display: inline-block;
+      line-height: 0;
+      font-size: 0;
+      background: url(https://accounts.kakao.com/assets/weblogin/ico_account.png);
+      vertical-align: top;
+      text-indent: -9999px;
+    }
+
+    .item_select .link_select {
+      display: block;
+      overflow: hidden;
+      display: block;
+      height: 40px;
+      padding: 0 15px;
+      line-height: 40px;
+      color: #252525;
+      font-size: 1.5em;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      border-collapse: separate;
+    }
+
+    .item_select .link_select:hover {
+      background: #fcfcfc;
+    }
+
+    .item_select .link_selected .ico_arr {
+      width: 12px;
+      height: 12px;
+      margin: 17px 0 0 8px;
+      background-position: -180px -30px;
+    }
+
+    .select_open .list_select {
+      display: block;
+    }
+
+    /*  */
+    .sticky_wrap {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      box-shadow: 10px 10px 10px rgba(0, 0, 0, 1);
+    }
+
+    .sticky {
+      max-width: 1024px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .sticky_value {
+      font-size: 1.8em;
+    }
+
+    .pop {
+      width: 90%;
+      max-width: 500px;
+      max-height: 500px;
+      padding: 2em;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+
+</body>
+
+</html>
